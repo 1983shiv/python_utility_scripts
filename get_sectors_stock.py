@@ -21,7 +21,7 @@ async def fetch_sector(stock_symbol, page):
     sector_element = await page.query_selector(f'xpath={sector_xpath}')
     sector_text = await sector_element.inner_text() if sector_element else 'N/A'
 
-    # Scrape the subsector information
+    # Scrape the industry information
     subsector_xpath = '/html/body/main/div[4]/div[1]/div[1]/div/ol/li[3]/a/span'
     subsector_element = await page.query_selector(f'xpath={subsector_xpath}')
     subsector_text = await subsector_element.inner_text() if subsector_element else 'N/A'
