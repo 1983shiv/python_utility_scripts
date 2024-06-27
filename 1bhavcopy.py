@@ -4,10 +4,15 @@ from datetime import datetime
 
 # Connect to MongoDB
 client = MongoClient('localhost', 27017)
-db = client['nsestocks']
+db = client['nse']
 collection = db['stocks']
 
-with open('sec_bhavdata_full_24052024.csv', 'r') as file:
+def insert_or_update_document(collection, document):
+    collection.insert_one(document)
+    print("New document inserted for date:", document['date'])
+   
+
+with open('sec_bhavdata_full_26062024.csv', 'r') as file:
     reader = csv.DictReader(file)
     for row in reader:
         if row[' SERIES'].strip() == 'EQ':  # Strip any extra spaces
@@ -26,6 +31,7 @@ with open('sec_bhavdata_full_24052024.csv', 'r') as file:
                 'deliv_qty': int(row[' DELIV_QTY'].strip()),
                 'deliv_per': float(row[' DELIV_PER'].strip())
             }
-            collection.insert_one(document)
+            if collection is not None:
+                insert_or_update_document(collection, document)
 
 print("Data inserted successfully into db")

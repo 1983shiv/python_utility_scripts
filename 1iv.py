@@ -1,11 +1,10 @@
 import csv
 from pymongo import MongoClient
 from datetime import datetime
-import math
 
 # Connect to MongoDB
 client = MongoClient('localhost', 27017)
-db = client['nsestocks']
+db = client['nse']
 stocks_collection = db['stocks']
 
 # Function to process IV data and update nsestocks collection
@@ -28,13 +27,14 @@ def process_and_update_iv_data(file_path):
             query = {'symbol': symbol, 'date': date}
             update = {
                 '$set': {
-                    'daily': daily,
-                    'yearly': yearly
+                    'iv_daily': daily,
+                    'iv_yearly': yearly
                 }
             }
             stocks_collection.update_one(query, update)
+            print("IV data updated for date:", date, symbol)
 
 # Call the function with the path to your IV CSV file
-process_and_update_iv_data('CMVOLT_24052024.csv')
+process_and_update_iv_data('CMVOLT_26062024.csv')
 
 print("IV data processed and nsestocks collection updated successfully")
