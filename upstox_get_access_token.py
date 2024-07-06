@@ -1,11 +1,11 @@
 import requests
 
-client_id = "21af32a9-aa6c-4685-b6a7-8de5ac22dfa2"
+client_id = ""
 client_pass = ""
 client_pin = ""
 auth_code = "4OWcKB"
-api_key = "21af32a9-aa6c-4685-b6a7-8de5ac22dfa2"
-api_secret = "y5jc8u1x7p"
+api_key = ""
+api_secret = ""
 
 redirect_uri = "http://localhost:3000"
 
