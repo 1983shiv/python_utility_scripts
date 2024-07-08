@@ -45,22 +45,37 @@ def get_premium_decay(symbol, index, data, csp, time, expiry):
     sum_CE_oi = 0
     sum_PE_oi = 0
     underlying_value = None
-
+    # print(data)
     # Iterate over the list of dictionaries
-    for strike_data in data:
-        ce_data = strike_data['CE']
-        pe_data = strike_data['PE']
+    # for strike_data in data:
+    #     ce_data = strike_data['CE']
+    #     pe_data = strike_data['PE']
 
-        sum_CE_change += round(ce_data['change'],2)
-        sum_CE_coi += ce_data['changeinOpenInterest']
-        sum_PE_change += round(pe_data['change'],2)
-        sum_PE_coi += pe_data['changeinOpenInterest']
-        sum_CE_oi += ce_data['openInterest']
-        sum_PE_oi += pe_data['openInterest']
+    #     sum_CE_change += round(ce_data['change'],2)
+    #     sum_CE_coi += ce_data['changeinOpenInterest']
+    #     sum_PE_change += round(pe_data['change'],2)
+    #     sum_PE_coi += pe_data['changeinOpenInterest']
+    #     sum_CE_oi += ce_data['openInterest']
+    #     sum_PE_oi += pe_data['openInterest']
         
-        # Store the underlying value
-        underlying_value = ce_data['underlyingValue']
-
+    #     # Store the underlying value
+    #     underlying_value = ce_data['underlyingValue']
+    for strike_data in data:
+        if 'CE' in strike_data:
+            ce_data = strike_data['CE']
+            sum_CE_change += round(ce_data['change'], 2)
+            sum_CE_coi += ce_data['changeinOpenInterest']
+            sum_CE_oi += ce_data['openInterest']
+            underlying_value = ce_data['underlyingValue']
+        if 'PE' in strike_data:
+            pe_data = strike_data['PE']
+            sum_PE_change += round(pe_data['change'], 2)
+            sum_PE_coi += pe_data['changeinOpenInterest']
+            sum_PE_oi += pe_data['openInterest']
+            # Store the underlying value (assuming it's the same for both CE and PE if they exist)
+            if 'CE' not in strike_data:
+                underlying_value = pe_data['underlyingValue']
+                
     # Create a new DataFrame with the aggregated results
     result_df = pd.DataFrame({
         "symbol": symbol,
@@ -161,7 +176,11 @@ def chart_prmdecay(data, time, ce_prmdecay, pe_prmdecay, title):
 # CANBK, CONCOR, LAURUSLABS, NMDC, VEDL
 def get_data_mongodb(stock):
     # Define the query to filter documents where 'index' field is 'nifty' and not None
-    query = {"symbol": {"$exists": True, "$ne": None, "$eq": stock}}
+    # query = {"symbol": {"$exists": True, "$ne": None, "$eq": stock}}
+    query = {
+        "symbol": {"$exists": True, "$ne": None, "$eq": stock},
+        "date": today  # Adjust the date format according to your data
+    }
 
     # Retrieve all documents matching the query
     documents = collection.find(query)
@@ -176,22 +195,25 @@ def get_data_mongodb(stock):
     df = df.drop_duplicates(subset='time')
     return df
 
+col1, col2 = st.columns(2)
+with col1:
+    df2tbl = st.empty()
 
-df1 = pd.DataFrame()
-df2 = pd.DataFrame()
-df3 = pd.DataFrame()
-df4 = pd.DataFrame()
-df5 = pd.DataFrame()
+with col2:
+    df4tbl = st.empty() 
 
 df1tbl = st.empty()
-df2tbl = st.empty()
 df3tbl = st.empty()
-df4tbl = st.empty()
 df5tbl = st.empty()
 
-sel_cols = ['index', 'time', 'nifty', 'current_strike_price', 'ce_prmdecay', 'pe_prmdecay', 'ce_coi', 'pe_coi', 'ce_oi', 'pe_oi']
+sel_cols = ['symbol', 'index', 'time', 'nifty', 'current_strike_price', 'ce_prmdecay', 'pe_prmdecay', 'ce_coi', 'pe_coi', 'ce_oi', 'pe_oi']
 
 def run_data_collection(start_time_str, end_time_str):
+    df1 = pd.DataFrame()
+    df2 = pd.DataFrame()
+    df3 = pd.DataFrame()
+    df4 = pd.DataFrame()
+    df5 = pd.DataFrame()
     # Parse the start and end times
     start_time = datetime.strptime(start_time_str, "%H:%M")
     end_time = datetime.strptime(end_time_str, "%H:%M")
@@ -239,27 +261,33 @@ def run_data_collection(start_time_str, end_time_str):
 
                 with df1tbl:
                     niftydata = get_data_mongodb('CANBK')[sel_cols]
-                    chart = chart_prmdecay(niftydata, 'time', 'ce_prmdecay', 'pe_prmdecay',  title=f'Nifty Prm Decay Chart')
+                    niftydata = get_data_mongodb('CANBK')
+                    st.write(niftydata)
+                    chart = chart_prmdecay(niftydata, 'time', 'ce_prmdecay', 'pe_prmdecay',  title=f'Prm Decay Chart - CANBANK')
                     df1tbl.plotly_chart(chart, use_container_width=True)
 
                 with df2tbl:
                     niftydata = get_data_mongodb('CONCOR')[sel_cols]
-                    chart = chart_prmdecay(niftydata, 'time', 'ce_prmdecay', 'pe_prmdecay',  title=f'Nifty Prm Decay Chart')
+                    st.write(niftydata)
+                    chart = chart_prmdecay(niftydata, 'time', 'ce_prmdecay', 'pe_prmdecay',  title=f'Prm Decay Chart - CONCOR')
                     df2tbl.plotly_chart(chart, use_container_width=True)
                 
                 with df3tbl:
                     niftydata = get_data_mongodb('LAURUSLABS')[sel_cols]
-                    chart = chart_prmdecay(niftydata, 'time', 'ce_prmdecay', 'pe_prmdecay',  title=f'Nifty Prm Decay Chart')
+                    st.write(niftydata)
+                    chart = chart_prmdecay(niftydata, 'time', 'ce_prmdecay', 'pe_prmdecay',  title=f'Prm Decay Chart - LAURASLABS')
                     df3tbl.plotly_chart(chart, use_container_width=True)
 
                 with df4tbl:
                     niftydata = get_data_mongodb('NMDC')[sel_cols]
-                    chart = chart_prmdecay(niftydata, 'time', 'ce_prmdecay', 'pe_prmdecay',  title=f'Nifty Prm Decay Chart')
+                    st.write(niftydata)
+                    chart = chart_prmdecay(niftydata, 'time', 'ce_prmdecay', 'pe_prmdecay',  title=f'Prm Decay Chart - NMDC')
                     df4tbl.plotly_chart(chart, use_container_width=True)
 
                 with df5tbl:
                     niftydata = get_data_mongodb('VEDL')[sel_cols]
-                    chart = chart_prmdecay(niftydata, 'time', 'ce_prmdecay', 'pe_prmdecay',  title=f'Nifty Prm Decay Chart')
+                    st.write(niftydata)
+                    chart = chart_prmdecay(niftydata, 'time', 'ce_prmdecay', 'pe_prmdecay',  title=f'Prm Decay Chart - VEDL')
                     df5tbl.plotly_chart(chart, use_container_width=True)
 
                 # Sleep for 1 minute
@@ -267,6 +295,7 @@ def run_data_collection(start_time_str, end_time_str):
             else:
                 # Sleep for 1 second to prevent a tight loop when waiting to start
                 time.sleep(1)
+            
 # lotsize, multiplier and stock
 # data = get__data(50, 4, "RELIANCE")
 # # data = get_stock_data(50, 4, "RELIANCE")
