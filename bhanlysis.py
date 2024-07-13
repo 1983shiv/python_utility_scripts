@@ -553,6 +553,7 @@ def fetch_data(dt=None):
             processed_data.append(flat_entry)
     
     df = pd.DataFrame(processed_data)
+    df['_id'] = df['_id'].astype(str)
     df['date'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d')  # Ensure date is in datetime format
     return df
 
@@ -571,6 +572,7 @@ def fetch_data2(dt=None):
         data = (list(collection.find(query2)))
 
     df = pd.DataFrame(data)
+    df['_id'] = df['_id'].astype(str)
     df['date'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d')  # Ensure date is in datetime format
     return df
 
@@ -581,6 +583,7 @@ def fetch_details(symbol=None):
         query = {"symbol": symbol}
         data = pd.DataFrame(list(collection.find(query)))
     df = pd.DataFrame(data)
+    df['_id'] = df['_id'].astype(str)
     df['date'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d')  # Ensure date is in datetime format
     return df
 
@@ -639,11 +642,11 @@ with summery:
         st.write(fno_positive_filter_symbols(df2, st.session_state.sel_date)['symbol'].count())
         st.write(fno_positive_filter_symbols(df2, st.session_state.sel_date)[fnocol])
 
-        st.subheader("FnO Positive / Buy (Traded Volue/Delivery Qty) ")
+        st.subheader("FnO Positive / Buy (Traded Value/Delivery Qty) ")
         st.write(fno_positive_wo_tv_dq(df2, st.session_state.sel_date)['symbol'].count())
         st.write(fno_positive_wo_tv_dq(df2, st.session_state.sel_date)[fnocol])
 
-        st.subheader("FnO Positive / Buy (Traded Volue)")
+        st.subheader("FnO Positive / Buy (Traded Value)")
         st.write(fno_positive_wo_tv(df2, st.session_state.sel_date)['symbol'].count())
         st.write(fno_positive_wo_tv(df2, st.session_state.sel_date)[fnocol])
 
@@ -657,11 +660,11 @@ with summery:
         st.write(fno_negative_filter_symbols(df2, st.session_state.sel_date)['symbol'].count())
         st.write(fno_negative_filter_symbols(df2, st.session_state.sel_date)[fnocol])
         
-        st.subheader("FnO Negative / Sell (Traded Volue/Delivery Qty)")
+        st.subheader("FnO Negative / Sell (Traded Value/Delivery Qty)")
         st.write(fno_negative_tv_dq(df2, st.session_state.sel_date)['symbol'].count())
         st.write(fno_negative_tv_dq(df2, st.session_state.sel_date)[fnocol])
         
-        st.subheader("FnO Negative / Sell (Traded Volue)")
+        st.subheader("FnO Negative / Sell (Traded Value)")
         st.write(fno_negative_tv(df2, st.session_state.sel_date)['symbol'].count())
         st.write(fno_negative_tv(df2, st.session_state.sel_date)[fnocol])
         
